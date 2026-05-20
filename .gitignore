@@ -1,0 +1,12 @@
+# Ignorar carpetas pesadas de dependencias
+node_modules/
+.dart_tool/
+.pub-cache/
+.pub/
+build/
+.next/
+
+# Ignorar archivos de variables de entorno (¡CRUCIAL!)
+.env
+.env.*
+!.env.example

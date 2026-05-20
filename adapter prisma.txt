@@ -1,0 +1,33 @@
+en la versión 7.8.0 de prisma se requiere instalar un adapter
+
+npm install pg @prisma/adapter-pg
+npm install @types/pg --save-dev
+
+luego reemplazar el prisma.services.ts
+
+import { Injectable, OnModuleInit, OnModuleDestroy } from '@nestjs/common';1
+import { PrismaClient } from '@prisma/client';
+import { Pool } from 'pg';
+import { PrismaPg } from '@prisma/adapter-pg';
+
+@Injectable()
+export class PrismaService extends PrismaClient implements OnModuleInit, OnModuleDestroy {
+  constructor() {
+    // 1. Creamos el Pool de conexiones usando el driver nativo de Postgres
+    const pool = new Pool({ connectionString: process.env.DATABASE_URL });
+    
+    // 2. Lo envolvemos en el adaptador oficial de Prisma
+    const adapter = new PrismaPg(pool);
+    
+    // 3. ¡Le pasamos el "adapter" a la clase padre como lo exige la versión 7.8!
+    super({ adapter });
+  }
+
+  async onModuleInit() {
+    await this.$connect();
+  }
+
+  async onModuleDestroy() {
+    await this.$disconnect();
+  }
+}
