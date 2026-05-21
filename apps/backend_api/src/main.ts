@@ -9,6 +9,11 @@ async function bootstrap() {
   // Habilitar CORS para que el Panel Next.js pueda hacer peticiones
   app.enableCors();
 
+  // 🚀 EL SECRETO DE LA NUBE: Leer el puerto dinámico de Render
+  const port = process.env.PORT || 3000;
+
+
+
   // Validaciones globales estrictas (Protege contra payloads con basura)
   app.useGlobalPipes(
     new ValidationPipe({
@@ -31,7 +36,8 @@ async function bootstrap() {
 
   // Iniciar el servidor en el puerto 3000
   await app.listen(3000, '0.0.0.0');
-  console.log(`🚀 Servidor corriendo en: http://localhost:3000`);
-  console.log(`📄 Swagger documentado en: http://localhost:3000/api`);
+  //console.log(`🚀 Servidor corriendo en: http://localhost:3000`);
+  //console.log(`📄 Swagger documentado en: http://localhost:3000/api`);
+  console.log(`🚀 Servidor corriendo en: http://localhost:${port}`);
 }
 bootstrap();
