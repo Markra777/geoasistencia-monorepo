@@ -1,0 +1,103 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// 1. Entidad: Usuario del sistema (Admin o Colaborador)
+model User {
+  id               String             @id @default(uuid())
+  fullName         String
+  employeeCode     String?            @unique // Opcional, útil para RRHH
+  email            String             @unique
+  passwordHash     String             // Nunca texto plano (RN-02)
+  role             Role               @default(COLLABORATOR)
+  isActive         Boolean            @default(true)
+  
+  // Relaciones
+  attendances      AttendanceRecord[]
+  devices          Device[]
+  refreshTokens    RefreshToken[]
+
+  createdAt        DateTime           @default(now())
+  updatedAt        DateTime           @updatedAt
+}
+
+enum Role {
+  ADMIN
+  COLLABORATOR
+}
+
+// 2. Entidad: Dispositivo asociado a un usuario
+model Device {
+  id               String             @id @default(uuid())
+  userId           String
+  deviceIdentifier String             @unique // UUID o IMEI del dispositivo
+  platform         String?            // "Android" o "iOS"
+  appVersion       String?
+  isActive         Boolean            @default(true)
+
+  user             User               @relation(fields: [userId], references: [id])
+  attendances      AttendanceRecord[]
+
+  createdAt        DateTime           @default(now())
+}
+
+// 3. Entidad: Evento de asistencia (El núcleo del sistema)
+model AttendanceRecord {
+  id             String   @id // Generado en Flutter para evitar duplicados offline
+  userId         String
+  type           String   // 'entry' o 'exit'
+  
+  localDateTime  DateTime
+  utcDateTime    DateTime
+  serverReceived DateTime @default(now()) // Auditoría
+  
+  // Ubicación GPS obligatoria
+  latitude       Float
+  longitude      Float
+  accuracy       Float    
+  
+  // Evidencias (Guardadas en disco/nube, aquí solo la ruta)
+  signatureUrl   String   
+  photoUrl       String?  // <-- ¡Tu nuevo requerimiento añadido!
+  
+  deviceId       String
+  comments      String?  // 🚀 NUEVO: Campo de comentarios opcional
+  createdAt     DateTime @default(now())
+
+  // Relaciones
+  user           User     @relation(fields: [userId], references: [id])
+  device         Device   @relation(fields: [deviceId], references: [id])
+
+  // Índices para optimizar las consultas en el panel admin
+  @@index([userId])
+  @@index([utcDateTime])
+}
+
+// 4. Entidad: Manejo de sesiones persistentes
+model RefreshToken {
+  id          String   @id @default(uuid())
+  userId      String
+  tokenHash   String   @unique
+  expiresAt   DateTime
+  revokedAt   DateTime?
+
+  user        User     @relation(fields: [userId], references: [id])
+  
+  createdAt   DateTime @default(now())
+}
+
+// 5. Entidad: Registro de eventos y trazabilidad
+model AuditLog {
+  id             String   @id @default(uuid())
+  actorUserId    String?  // Quien hizo la acción
+  entityType     String   // Ej: "User", "AttendanceRecord"
+  entityId       String
+  action         String   // Ej: "CREATE", "UPDATE", "DELETE"
+  metadataJson   String?  // Detalles adicionales en formato JSON
+  
+  createdAt      DateTime @default(now())
+}
