@@ -19,7 +19,7 @@ export default function Login() {
 
     try {
       // Conectamos con tu endpoint de NestJS
-      const response = await fetch('http://localhost:3000/auth/login', {
+      const response = await fetch('https://geoasistencia-api.onrender.com/auth/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, password }),

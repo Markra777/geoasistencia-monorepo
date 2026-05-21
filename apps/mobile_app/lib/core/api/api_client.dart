@@ -6,7 +6,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 class ApiClient {
   // Si pruebas en el emulador de Android, localhost es 10.0.2.2
   // Si usas un celular físico en la misma red Wi-Fi, pon la IP de tu PC (ej. 192.168.1.X)
-  static const String baseUrl = 'http://192.168.18.17:3000'; 
+  //static const String baseUrl = 'http://192.168.18.17:3000'; 
+  static const String baseUrl = 'https://geoasistencia-api.onrender.com';
 
   // Método auxiliar para obtener el JWT guardado
   Future<Map<String, String>> _getHeaders() async {

@@ -4,6 +4,7 @@ import { AuthService } from './auth.service';
 import { LoginDto } from './dto/login.dto';
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
 import { AuthGuard } from '@nestjs/passport';
+import { HttpException } from '@nestjs/common';
 
 @ApiTags('Autenticación')
 @Controller('auth')
@@ -29,5 +30,16 @@ export class AuthController {
   getProfile(@Request() req) {
     // req.user contiene lo que devolvió la función validate() de tu JwtStrategy
     return req.user; 
+  }
+
+  // 🚀 NUEVO: Endpoint seguro para crear usuarios desde el panel
+  @UseGuards(AuthGuard('jwt'))
+  @Post('create-user')
+  async createCollaborator(@Body() body: any) {
+    try {
+      return await this.authService.createCollaborator(body);
+    } catch (error: any) {
+      throw new HttpException(error.message, HttpStatus.BAD_REQUEST);
+    }
   }
 }
